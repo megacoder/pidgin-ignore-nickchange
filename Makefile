@@ -1,5 +1,6 @@
+VERSION	:=0.0.0
 CC	:= gcc -march=native -std=gnu99
-CFLAGS	=
+CFLAGS	=-DVERSION='"${VERSION}"'
 CFLAGS	+=-O3 -Wall -pedantic -fPIC
 CFLAGS	+=`pkg-config --cflags glib-2.0`
 CFLAGS	+=`pkg-config --cflags purple`

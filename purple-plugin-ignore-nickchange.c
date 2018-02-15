@@ -1,3 +1,7 @@
+#ifndef	VERSION
+# define VERSION "W.T.F."
+#endif	/* NOT(VERSION) */
+
 #define PURPLE_PLUGINS
 
 #include <unistd.h>
@@ -364,7 +368,7 @@ static PurplePluginInfo info =
 
 	NICKCHANGE_PLUGIN_ID,                               /**< id             */
 	N_("Ignore Nick Change"),                           /**< name           */
-	"0.2",                                  /**< version        */
+	VERSION,                                  /**< version        */
 	                                                  /**  summary        */
 	N_("Hides name changing."),
 	                                                  /**  description    */
