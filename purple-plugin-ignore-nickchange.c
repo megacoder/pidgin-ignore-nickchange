@@ -363,15 +363,13 @@ static PurplePluginInfo info =
 	PURPLE_PRIORITY_DEFAULT,                            /**< priority       */
 
 	NICKCHANGE_PLUGIN_ID,                               /**< id             */
-	N_("Nick Change Hiding"),                           /**< name           */
+	N_("Ignore Nick Change"),                           /**< name           */
 	"0.2",                                  /**< version        */
 	                                                  /**  summary        */
-	N_("Hides extraneous name changing messages."),
+	N_("Hides name changing."),
 	                                                  /**  description    */
-	N_("This plugin hides name change messages in large "
-	   "rooms, except for those users actively taking "
-	   "part in a conversation."),
-	"Eion Robb <eionrobb@gmail.com>",             /**< author         */
+	N_("Hide name change messages."),
+	"Tommy Reynolds <oldest.software.guy@gmail.com>",             /**< author         */
 	"",                                     /**< homepage       */
 
 	plugin_load,                                      /**< load           */
@@ -393,7 +391,7 @@ static PurplePluginInfo info =
 static void
 init_plugin(PurplePlugin *plugin)
 {
-	purple_prefs_add_none("/plugins/core/nickchange");
+	purple_prefs_add_none("/plugins/core/nickchanges");
 
 	purple_prefs_add_int(DELAY_PREF, DELAY_DEFAULT);
 	purple_prefs_add_int(THRESHOLD_PREF, THRESHOLD_DEFAULT);
