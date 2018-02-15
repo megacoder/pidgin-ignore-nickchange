@@ -1,18 +1,27 @@
-CC := gcc
+CC	:= gcc -march=native -std=gnu99
+CFLAGS	=
+CFLAGS	+=-O3 -Wall -pedantic -fPIC
+CFLAGS	+=`pkg-config --cflags glib-2.0`
+CFLAGS	+=`pkg-config --cflags purple`
+CFLAGS	+=`pkg-config --cflags pidgin`
 
-PLUGIN_NAME = nickchange
+LDFLAGS	=-shared
 
-all: build install-user
+LDLIBS	=
+LDLIBS	+=`pkg-config --libs glib-2.0`
+LDLIBS	+=`pkg-config --libs purple`
+LDLIBS	+=`pkg-config --libs pidgin`
 
-build: $(PLUGIN_NAME).so
+all::	purple-plugin-ignore-nickchange.so
 
-install-user: ~/.purple/plugins/$(PLUGIN_NAME).so
+purple-plugin-ignore-nickchange.so:: purple-plugin-ignore-nickchange.c
+	${CC} -o $@ ${CFLAGS} ${LDFLAGS} ${LDLIBS} $^
 
-$(HOME)/.purple/plugins/$(PLUGIN_NAME).so: $(PLUGIN_NAME).so
-	cp -v $< $@
+install:: purple-plugin-ignore-nickchange.so
+	install -D $^ /usr/lib64/pidgin/$^
 
-$(PLUGIN_NAME).so: $(PLUGIN_NAME).c
-	$(CC) $(CFLAGS) -Wall -fPIC $< -o $@ -shared `pkg-config --cflags --libs glib-2.0 purple pidgin`
+clean::
+	${RM} *.o *~ a.out core*
 
-clean:
-	rm -rf *.o *.c~ *.h~ *.so *.la .libs
+clobber distclean:: clean
+	${RM} *.so

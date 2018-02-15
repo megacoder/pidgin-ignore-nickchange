@@ -1,5 +1,8 @@
 #define PURPLE_PLUGINS
 
+#include <unistd.h>
+#include <string.h>
+
 #include "conversation.h"
 #include "debug.h"
 #include "plugin.h"
@@ -173,18 +176,13 @@ static gboolean clean_users_hash(GHashTable *users)
 	return TRUE;
 }
 
-/*static void
-toggle_nickchange_pref(const char *name, PurplePrefType type, gconstpointer val, gpointer data)
-{
-	
-}*/
 static void nickchange_chat_rename_user
 (PurpleConversation *conv, const char *old_user, const char *new_user, const char *new_alias)
 {
 	if (!should_hide_notice(conv, old_user, userstable)) {
 		PurpleConvChat *chat = PURPLE_CONV_CHAT(conv);
 		char tmp[2048];
-		
+
 		if (purple_strequal(chat->nick, purple_normalize(conv->account, old_user))) {
 			// Its me!
 			char *escaped = g_markup_escape_text(new_user, -1);
@@ -198,7 +196,7 @@ static void nickchange_chat_rename_user
 			char *escaped2;
 			PurpleConnection *gc = purple_conversation_get_gc(conv);
 			PurplePluginProtocolInfo *prpl_info;
-			
+
 			prpl_info = PURPLE_PLUGIN_PROTOCOL_INFO(purple_connection_get_prpl(gc));
 			if (prpl_info && !(prpl_info->options & OPT_PROTO_UNIQUE_CHATNAME)) {
 				PurpleBuddy *buddy;
@@ -221,16 +219,17 @@ static void nickchange_chat_rename_user
 				PURPLE_MESSAGE_SYSTEM | PURPLE_MESSAGE_NO_LINKIFY,
 				time(NULL));
 	}
-	
-	if (orig_chat_rename_user)
-		return orig_chat_rename_user(conv, old_user, new_user, new_alias);
+
+	if (orig_chat_rename_user)	{
+		orig_chat_rename_user(conv, old_user, new_user, new_alias);
+	}
 }
 
 static gboolean
 writing_im_msg_cb(PurpleAccount *account, const char *who, char **message, PurpleConversation *conv, PurpleMessageFlags flags)
 {
 	gboolean suppress_message = FALSE;
-	
+
 	if(purple_prefs_get_bool(HIDE_IM_PREF)) {
 		if (flags & (PURPLE_MESSAGE_SYSTEM | PURPLE_MESSAGE_NO_LINKIFY)) {
 			//Create a fake string to handle translations
@@ -241,16 +240,16 @@ writing_im_msg_cb(PurpleAccount *account, const char *who, char **message, Purpl
 			g_free(fake_rename);
 		}
 	}
-	
+
 	return suppress_message;
 }
-						   
+
 
 static gboolean plugin_load(PurplePlugin *plugin)
 {
 	void *conv_handle;
 	PurpleConversationUiOps *ui_ops;
-	
+
 	purple_prefs_set_bool(PURPLE_NICKCHANGE_PREF, FALSE);
 
 	userstable = g_hash_table_new_full((GHashFunc)joinpart_key_hash,
@@ -265,13 +264,13 @@ static gboolean plugin_load(PurplePlugin *plugin)
 	purple_signal_connect(conv_handle, "writing-im-msg", plugin, PURPLE_CALLBACK(writing_im_msg_cb), NULL);
 
 	//purple_prefs_connect_callback(plugin, const char *name, PurplePrefCallback cb, gpointer data)
-	
+
 	//Attempt overriding the global UI ops
 	ui_ops = pidgin_conversations_get_conv_ui_ops();
-	
+
 	/* Cleanup every 5 minutes */
 	clean_user_timeout = purple_timeout_add_seconds(60 * 5, (GSourceFunc)clean_users_hash, userstable);
-	
+
 	if (ui_ops) {
 		orig_chat_rename_user = ui_ops->chat_rename_user;
 		ui_ops->chat_rename_user = nickchange_chat_rename_user;
@@ -286,7 +285,7 @@ static gboolean plugin_load(PurplePlugin *plugin)
 static gboolean plugin_unload(PurplePlugin *plugin)
 {
 	PurpleConversationUiOps *ui_ops;
-	
+
 	purple_prefs_set_bool(PURPLE_NICKCHANGE_PREF, TRUE);
 
 	/* Destroy the hash table. The core plugin code will
@@ -295,12 +294,12 @@ static gboolean plugin_unload(PurplePlugin *plugin)
 	g_hash_table_destroy(userstable);
 
 	purple_timeout_remove(clean_user_timeout);
-	
+
 	if (orig_chat_rename_user) {
 		ui_ops = pidgin_conversations_get_conv_ui_ops();
 		ui_ops->chat_rename_user = orig_chat_rename_user;
 	}
-	
+
 	return TRUE;
 }
 
@@ -400,7 +399,7 @@ init_plugin(PurplePlugin *plugin)
 	purple_prefs_add_int(THRESHOLD_PREF, THRESHOLD_DEFAULT);
 	purple_prefs_add_bool(HIDE_BUDDIES_PREF, HIDE_BUDDIES_DEFAULT);
 	purple_prefs_add_bool(HIDE_IM_PREF, HIDE_IM_DEFAULT);
-	
+
 #if ENABLE_NLS
 	bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
 	bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
